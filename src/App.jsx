@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 export default function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,7 +8,6 @@ export default function App() {
     dob: "",
     phone: "",
   });
-  const modalRef = useRef(null);
 
   // Close on ESC
   useEffect(() => {
@@ -28,7 +27,7 @@ export default function App() {
 
     const { username, email, dob, phone } = form;
 
-    // --- Field-specific validations first (so single-field tests pass even if others empty) ---
+    // Field-specific validations first (so single-field tests pass)
     if (email && !email.includes("@")) {
       alert("Invalid email. Please check your email address.");
       return;
@@ -54,7 +53,7 @@ export default function App() {
       }
     }
 
-    // --- Required checks after field-specific ones ---
+    // Required checks afterwards
     if (!username.trim()) {
       alert("Please fill out the Username field.");
       return;
@@ -72,34 +71,23 @@ export default function App() {
       return;
     }
 
-    // Success -> close and reset to initial state
+    // Success -> close and reset
     setIsOpen(false);
     reset();
   }
 
+  // Close when clicking the overlay (outside the white box)
   function onOverlayClick(e) {
-    // Close only when clicking the overlay (outside modal content)
     if (e.target === e.currentTarget) setIsOpen(false);
   }
 
   return (
-    <div className="modal">
-      {/* Global CSS so tests don't rely on Tailwind and the root is always sized */}
+    <div className="app-root">
       <style>{`
-        /* Make sure the app root actually has size in the test browser */
         html, body, #root { height: 100%; width: 100%; margin: 0; }
 
-        /* Ensure .modal is always visible and fills the viewport */
+        /* Rendered ONLY when modal is open */
         .modal {
-          position: fixed;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #ffffff;
-        }
-
-        .overlay {
           position: fixed;
           inset: 0;
           background: rgba(0,0,0,0.35);
@@ -108,6 +96,7 @@ export default function App() {
           justify-content: center;
           padding: 16px;
         }
+
         .modal-content {
           background: white;
           border-radius: 12px;
@@ -115,14 +104,10 @@ export default function App() {
           width: 92vw;
           box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
+
         .field { display: flex; flex-direction: column; gap: 6px; }
         .label { font-weight: 600; }
-        .input {
-          border: 1px solid #d1d5db;
-          border-radius: 8px;
-          padding: 10px 12px;
-          font-size: 14px;
-        }
+        .input { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
         .btn { border: none; border-radius: 10px; padding: 10px 14px; cursor: pointer; }
         .btn-primary { background: #2563eb; color: #fff; }
         .btn-secondary { background: #e5e7eb; }
@@ -136,7 +121,7 @@ export default function App() {
       )}
 
       {isOpen && (
-        <div className="overlay" onClick={onOverlayClick} ref={modalRef}>
+        <div className="modal" onClick={onOverlayClick}>
           <div className="modal-content" role="dialog" aria-modal="true">
             <div style={{ padding: "24px" }}>
               <h2 style={{ margin: "0 0 16px", fontWeight: 700 }}>User Details</h2>
