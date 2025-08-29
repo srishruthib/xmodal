@@ -1,195 +1,149 @@
-import { useState, useEffect } from "react";
+import './App.css';
+import React, { useState } from 'react';
 
-export default function App() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    dob: "",
-    phone: "",
+const App = () => {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    phonenumber: '',
+    dateofbirth: ''
   });
 
-  // Close on ESC
-  useEffect(() => {
-    function onKey(e) {
-      if (e.key === "Escape" && isOpen) setIsOpen(false);
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen]);
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value
+    }));
+  };
 
-  function reset() {
-    setForm({ username: "", email: "", dob: "", phone: "" });
-  }
+  const VailedEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
-  function handleSubmit(e) {
+  const ValidPhoneNumber = (phonenumber) => {
+    return /^\d{10}$/.test(phonenumber);
+  };
+
+  const VailedDOB = (dateofbirth) => {
+    const today = new Date();
+    const dob = new Date(dateofbirth);
+    return dob <= today;
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
+    const { email, dateofbirth, phonenumber } = formData;
 
-    const { username, email, dob, phone } = form;
-
-    // Field-specific validations first (so single-field tests pass)
-    if (email && !email.includes("@")) {
-      alert("Invalid email. Please check your email address.");
+    if (!VailedEmail(email)) {
+      alert('Invalid email id. Please enter a valid email address.');
       return;
     }
 
-    const digitsOnly = phone.replace(/\D/g, "");
-    if (phone && digitsOnly.length !== 10) {
-      alert("Invalid phone number. Please enter a 10-digit phone number.");
+    if (!VailedDOB(dateofbirth)) {
+      alert('Invalid date of birth. Date of birth cannot be in the future.');
       return;
     }
 
-    if (dob) {
-      const today = new Date();
-      const dobDate = new Date(dob);
-      const todayYMD = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
-      if (dobDate > todayYMD) {
-        alert("Invalid date of birth. Date of birth cannot be in the future.");
-        return;
-      }
-    }
-
-    // Required checks afterwards
-    if (!username.trim()) {
-      alert("Please fill out the Username field.");
+    if (!ValidPhoneNumber(phonenumber)) {
+      alert('Invalid phone number. Please enter a 10-digit phone number.');
       return;
     }
-    if (!email.trim()) {
-      alert("Please fill out the Email field.");
-      return;
-    }
-    if (!phone.trim()) {
-      alert("Please fill out the Phone Number field.");
-      return;
-    }
-    if (!dob.trim()) {
-      alert("Please fill out the Date of Birth field.");
-      return;
-    }
-
-    // Success -> close and reset
-    setIsOpen(false);
-    reset();
-  }
-
-  // Close when clicking the overlay (outside the white box)
-  function onOverlayClick(e) {
-    if (e.target === e.currentTarget) setIsOpen(false);
-  }
+    
+    alert('Form submitted successfully!');
+    console.log('Form submitted');
+  };
 
   return (
-    <div className="app-root">
-      <style>{`
-        html, body, #root { height: 100%; width: 100%; margin: 0; }
-
-        /* Rendered ONLY when modal is open */
-        .modal {
-          position: fixed;
-          inset: 0;
-          background: rgba(0,0,0,0.35);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 16px;
-        }
-
-        .modal-content {
-          background: white;
-          border-radius: 12px;
-          max-width: 480px;
-          width: 92vw;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-
-        .field { display: flex; flex-direction: column; gap: 6px; }
-        .label { font-weight: 600; }
-        .input { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
-        .btn { border: none; border-radius: 10px; padding: 10px 14px; cursor: pointer; }
-        .btn-primary { background: #2563eb; color: #fff; }
-        .btn-secondary { background: #e5e7eb; }
-        .actions { display: flex; gap: 10px; justify-content: flex-end; }
-      `}</style>
-
-      {!isOpen && (
-        <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
-          Open Form
-        </button>
+    <div id="root" style={{ position: 'relative', minHeight: '100vh' }}>
+      {!open && (
+        <button onClick={() => setOpen(true)}>Open Form</button>
       )}
 
-      {isOpen && (
-        <div className="modal" onClick={onOverlayClick}>
-          <div className="modal-content" role="dialog" aria-modal="true">
-            <div style={{ padding: "24px" }}>
-              <h2 style={{ margin: "0 0 16px", fontWeight: 700 }}>User Details</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="field" style={{ marginBottom: 12 }}>
-                  <label className="label" htmlFor="username">Username</label>
-                  <input
-                    id="username"
-                    className="input"
-                    type="text"
-                    value={form.username}
-                    onChange={(e) => setForm({ ...form, username: e.target.value })}
-                    placeholder="Enter your username"
-                  />
-                </div>
+      {open && (
+        <div
+          className="modal"
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              padding: '20px',
+              borderRadius: '8px',
+              width: '400px'
+            }}
+          >
+            <h1>User Details Modal</h1>
+            <form onSubmit={handleSubmit}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label>User Name:</label>
+                <input
+                  type="text"
+                  id="username"
+                  placeholder="User Name"
+                  onChange={handleChange}
+                  value={formData.username}
+                  required
+                />
 
-                <div className="field" style={{ marginBottom: 12 }}>
-                  <label className="label" htmlFor="email">Email</label>
-                  <input
-                    id="email"
-                    className="input"
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="name@example.com"
-                  />
-                </div>
+                <label>Email Address:</label>
+                <input
+                  type="text"
+                  id="email"
+                  placeholder="Email Address"
+                  onChange={handleChange}
+                  value={formData.email}
+                  required
+                />
 
-                <div className="field" style={{ marginBottom: 12 }}>
-                  <label className="label" htmlFor="phone">Phone Number</label>
-                  <input
-                    id="phone"
-                    className="input"
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    placeholder="10-digit number"
-                  />
-                </div>
+                <label>Phone Number:</label>
+                <input
+                  type="number"
+                  id="phone"
+                  placeholder="Phone Number"
+                  onChange={handleChange}
+                  value={formData.phonenumber}
+                  required
+                />
 
-                <div className="field" style={{ marginBottom: 20 }}>
-                  <label className="label" htmlFor="dob">Date of Birth</label>
-                  <input
-                    id="dob"
-                    className="input"
-                    type="date"
-                    value={form.dob}
-                    onChange={(e) => setForm({ ...form, dob: e.target.value })}
-                  />
-                </div>
+                <label>Date of Birth:</label>
+                <input
+                  type="date"
+                  id="dob"
+                  placeholder="Date of Birth"
+                  onChange={handleChange}
+                  value={formData.dateofbirth}
+                  required
+                />
 
-                <div className="actions">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary submit-button">
-                    Submit
-                  </button>
-                </div>
-              </form>
-            </div>
+                <button
+                  type="submit"
+                  className="submit-button"
+                  style={{ marginTop: '20px' }}
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default App;

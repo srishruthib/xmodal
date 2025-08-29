@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+input {
+  width: 40%;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  margin-left: 30%;
+}
